@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu Server Web App</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
+        .card { background: white; padding: 25px; display: inline-block; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 350px; }
+        input { padding: 10px; width: 65%; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; font-size: 14px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #218838; }
+        ul { list-style-type: none; padding: 0; margin-top: 20px; text-align: left; }
+        li { background: #eee; margin: 5px 0; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Item Manager</h2>
+        <div>
+            <input type="text" id="itemName" placeholder="Enter item name">
+            <button onclick="addItem()">Add</button>
+        </div>
+        <h3>Item List</h3>
+        <ul id="itemList"></ul>
+    </div>
+
+    <script>
+        const host = window.location.hostname;
+        const apiBase = `http://${host}:8000/api/items`;
+
+        async function fetchItems() {
+            try {
+                const res = await fetch(apiBase);
+                const items = await res.json();
+                const list = document.getElementById('itemList');
+                list.innerHTML = '';
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `#${item.id} - ${item.name}`;
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                console.error("Error fetching items:", err);
+            }
+        }
+
+        async function addItem() {
+            const input = document.getElementById('itemName');
+            const name = input.value.trim();
+            if (!name) return alert("Please enter an item name!");
+
+            try {
+                const res = await fetch(apiBase, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                if (res.ok) {
+                    input.value = '';
+                    fetchItems();
+                }
+            } catch (err) {
+                console.error("Error adding item:", err);
+            }
+        }
+
+        fetchItems();
+    </script>
+</body>
+</html>
