@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Router Automation Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; }
+        .container { max-width: 600px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        pre { background: #222; color: #00ff00; padding: 15px; border-radius: 5px; overflow-x: auto; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Router Command Execution</h2>
+        <label for="ip">Router IP Address:</label>
+        <input type="text" id="ip" placeholder="e.g., 192.168.238.129">
+
+        <label for="command">Router Command Line:</label>
+        <input type="text" id="command" placeholder="e.g., show ip int brief">
+
+        <button onclick="runCommand()">Execute</button>
+
+        <h3>Output:</h3>
+        <pre id="output">Results will appear here...</pre>
+    </div>
+
+    <script>
+        async function runCommand() {
+            const ip = document.getElementById('ip').value;
+            const command = document.getElementById('command').value;
+            const outputElement = document.getElementById('output');
+
+            outputElement.innerText = 'Executing command...';
+
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip, command })
+                });
+                const data = await response.json();
+                if (data.error) {
+                    outputElement.innerText = 'Error: ' + data.error;
+                } else {
+                    outputElement.innerText = data.output;
+                }
+            } catch (err) {
+                outputElement.innerText = 'Failed to connect to backend server.';
+            }
+        }
+    </script>
+</body>
+</html>
